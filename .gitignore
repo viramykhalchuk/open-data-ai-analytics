@@ -1,0 +1,23 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Virtual env / env files
+.venv/
+.env
+
+# OS
+.DS_Store
+
+# Large data
+data/raw/
+data/external/
+
+# Archives
+*.zip
+*.7z
+*.tar
+*.gz
