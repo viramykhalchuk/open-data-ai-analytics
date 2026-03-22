@@ -1,0 +1,74 @@
+name: CI (modules)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  PYTHONUNBUFFERED: "1"
+  MPLBACKEND: "Agg"
+  DEMO_INPUT: "data/demo/transport_demo.csv"
+  SAMPLE_OUTPUT: "data/processed/sample_head.csv"
+
+jobs:
+  run-modules:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [data_load, data_quality_analysis, data_research, visualization]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create working folders
+        run: |
+          mkdir -p data/processed
+          mkdir -p artifacts/${{ matrix.module }}
+
+      - name: Prepare sample data
+        if: ${{ matrix.module != 'data_load' }}
+        run: |
+          python src/data_load.py --input "$DEMO_INPUT" --rows 500 --output "$SAMPLE_OUTPUT" > artifacts/${{ matrix.module }}/prepare.log 2>&1
+
+      - name: Run module
+        run: |
+          case "${{ matrix.module }}" in
+            data_load)
+              python src/data_load.py --input "$DEMO_INPUT" --rows 500 --output "$SAMPLE_OUTPUT" > artifacts/${{ matrix.module }}/run.log 2>&1
+              cp "$SAMPLE_OUTPUT" artifacts/${{ matrix.module }}/
+              ;;
+            data_quality_analysis)
+              python src/data_quality_analysis.py > artifacts/${{ matrix.module }}/run.log 2>&1
+              ;;
+            data_research)
+              python src/data_research.py > artifacts/${{ matrix.module }}/run.log 2>&1
+              ;;
+            visualization)
+              python src/visualization.py > artifacts/${{ matrix.module }}/run.log 2>&1
+              cp reports/figures/*.png artifacts/${{ matrix.module }}/ || true
+              ;;
+          esac
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ matrix.module }}
+          path: artifacts/${{ matrix.module }}
