@@ -1,0 +1,55 @@
+name: CI Self-Hosted
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+env:
+  PYTHONUNBUFFERED: "1"
+  MPLBACKEND: "Agg"
+  DEMO_INPUT: "data/demo/transport_demo.csv"
+  SAMPLE_OUTPUT: "data/processed/sample_head.csv"
+
+jobs:
+  run-on-mac:
+    runs-on: [self-hosted, macOS, X64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show runner info
+        run: |
+          uname -a
+          python3 --version || true
+
+      - name: Set up Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+
+      - name: Create working folders
+        run: |
+          mkdir -p data/processed
+          mkdir -p artifacts/selfhosted
+
+      - name: Prepare sample data
+        run: |
+          python3 src/data_load.py --input "$DEMO_INPUT" --rows 500 --output "$SAMPLE_OUTPUT" > artifacts/selfhosted/prepare.log 2>&1
+
+      - name: Run visualization module
+        run: |
+          python3 src/visualization.py > artifacts/selfhosted/run.log 2>&1
+
+      - name: Copy generated files
+        run: |
+          cp "$SAMPLE_OUTPUT" artifacts/selfhosted/ || true
+          cp reports/figures/*.png artifacts/selfhosted/ || true
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-selfhosted-visualization
+          path: artifacts/selfhosted
