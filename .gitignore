@@ -21,3 +21,6 @@ data/external/
 *.7z
 *.tar
 *.gz
+
+shared/
+data/processed/
