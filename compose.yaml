@@ -1,0 +1,105 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: open_data_postgres
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  data_load:
+    build:
+      context: .
+      dockerfile: data_load/Dockerfile
+    container_name: data_load_service
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+      - ./shared:/app/shared
+    restart: "no"
+
+  data_quality_analysis:
+    build:
+      context: .
+      dockerfile: data_quality_analysis/Dockerfile
+    container_name: data_quality_service
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      data_load:
+        condition: service_completed_successfully
+    volumes:
+      - ./shared:/app/shared
+    restart: "no"
+
+  data_research:
+    build:
+      context: .
+      dockerfile: data_research/Dockerfile
+    container_name: data_research_service
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      data_load:
+        condition: service_completed_successfully
+    volumes:
+      - ./shared:/app/shared
+    restart: "no"
+
+  visualization:
+    build:
+      context: .
+      dockerfile: visualization/Dockerfile
+    container_name: visualization_service
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      data_load:
+        condition: service_completed_successfully
+    volumes:
+      - ./shared:/app/shared
+    restart: "no"
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    container_name: web_service
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      data_load:
+        condition: service_completed_successfully
+      data_quality_analysis:
+        condition: service_completed_successfully
+      data_research:
+        condition: service_completed_successfully
+      visualization:
+        condition: service_completed_successfully
+    volumes:
+      - ./shared:/app/shared
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

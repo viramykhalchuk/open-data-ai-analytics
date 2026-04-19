@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Open Data AI Analytics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f7f7f7;
+            color: #222;
+        }
+        h1, h2 {
+            margin-bottom: 10px;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            font-size: 14px;
+            text-align: left;
+        }
+        th {
+            background: #f0f0f0;
+        }
+        img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: #fafafa;
+            padding: 12px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Open Data AI Analytics</h1>
+
+    <div class="card">
+        <h2>Опис проєкту</h2>
+        <p>Цей веб-інтерфейс показує завантажені дані, результати перевірки якості, базове дослідження та побудовані візуалізації.</p>
+    </div>
+
+    <div class="card">
+        <h2>Попередній перегляд даних</h2>
+        {% if db_error %}
+            <p>Помилка доступу до БД: {{ db_error }}</p>
+        {% elif preview_rows %}
+            <table>
+                <thead>
+                    <tr>
+                        {% for col in preview_columns %}
+                            <th>{{ col }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in preview_rows %}
+                        <tr>
+                            {% for col in preview_columns %}
+                                <td>{{ row[col] }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Дані ще недоступні.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Результати перевірки якості</h2>
+        {% if quality_report %}
+            <pre>{{ quality_report | tojson(indent=2) }}</pre>
+        {% else %}
+            <p>Файл quality_report.json ще не знайдено.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Результати дослідження даних</h2>
+        {% if research_report %}
+            <pre>{{ research_report | tojson(indent=2) }}</pre>
+        {% else %}
+            <p>Файл research_report.json ще не знайдено.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Візуалізації</h2>
+        {% if figure_files %}
+            {% for filename in figure_files %}
+                <div style="margin-bottom: 20px;">
+                    <p><strong>{{ filename }}</strong></p>
+                    <img src="/figures/{{ filename }}" alt="{{ filename }}">
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Графіки ще не згенеровані.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

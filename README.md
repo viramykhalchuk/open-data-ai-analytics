@@ -16,3 +16,42 @@ https://data.gov.ua/dataset/06779371-308f-42d7-895e-5a39833375f0/resource/b1bcb4
 2. Які типи пального та кольори є найпоширенішими серед транспортних засобів?
 3. Чи існує зв’язок між роком випуску, вантажопідйомністю, власною масою та повною масою транспортного 
 засобу?
+
+## Docker Workspace
+
+### Сервіси проєкту
+- `db` — PostgreSQL база даних
+- `data_load` — зчитування CSV і завантаження даних у БД
+- `data_quality_analysis` — перевірка якості даних і формування JSON-звіту
+- `data_research` — базове дослідження даних і формування JSON-звіту
+- `visualization` — побудова графіків і збереження їх у PNG
+- `web` — Flask-вебінтерфейс для перегляду результатів
+
+### Структура
+- `data_load/` — Dockerfile, app.py, requirements.txt для сервісу завантаження
+- `data_quality_analysis/` — Dockerfile, app.py, requirements.txt для перевірки якості
+- `data_research/` — Dockerfile, app.py, requirements.txt для дослідження
+- `visualization/` — Dockerfile, app.py, requirements.txt для побудови графіків
+- `web/` — Dockerfile, app.py, templates для веб-інтерфейсу
+- `compose.yaml` — спільний запуск усіх сервісів
+
+### Запуск
+```bash
+docker compose up --build
+```
+
+### Зупинка
+```bash
+docker compose down
+```
+
+### Доступ
+- Веб-інтерфейс: `http://localhost:8000`
+- PostgreSQL: порт `5432`
+
+### Взаємодія сервісів
+- `data_load` імпортує CSV у PostgreSQL
+- `data_quality_analysis` читає дані з БД і формує `quality_report.json`
+- `data_research` читає дані з БД і формує `research_report.json`
+- `visualization` читає дані з БД і формує PNG-графіки
+- `web` показує таблицю даних, звіти та графіки через браузер
