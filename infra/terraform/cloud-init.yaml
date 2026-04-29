@@ -18,4 +18,4 @@ runcmd:
   - rm -rf ${project_dir}
   - git clone ${repo_url} ${project_dir}
   - cd ${project_dir} && cp .env.example .env
-  - cd ${project_dir} && docker compose -f ${compose_file} up -d --build
+  - cd ${project_dir} && docker compose -f ${compose_file} -f ${monitoring_compose_file} up -d --build

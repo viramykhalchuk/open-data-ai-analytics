@@ -68,6 +68,30 @@ resource "azurerm_network_security_group" "nsg" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+
+  security_rule {
+    name                       = "Allow-Prometheus"
+    priority                   = 1003
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = tostring(var.prometheus_port)
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "Allow-Grafana"
+    priority                   = 1004
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = tostring(var.grafana_port)
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 }
 
 resource "azurerm_network_interface" "nic" {
@@ -119,9 +143,10 @@ resource "azurerm_linux_virtual_machine" "vm" {
   }
 
   custom_data = base64encode(templatefile("${path.module}/cloud-init.yaml", {
-    repo_url       = var.repo_url
-    project_dir    = var.project_dir
-    compose_file   = var.compose_file
-    admin_username = var.admin_username
+    repo_url                 = var.repo_url
+    project_dir              = var.project_dir
+    compose_file             = var.compose_file
+    monitoring_compose_file  = var.monitoring_compose_file
+    admin_username           = var.admin_username
   }))
 }

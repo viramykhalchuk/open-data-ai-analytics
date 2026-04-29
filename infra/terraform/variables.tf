@@ -46,8 +46,26 @@ variable "compose_file" {
   default     = "compose.yaml"
 }
 
+variable "monitoring_compose_file" {
+  description = "Docker Compose monitoring file name"
+  type        = string
+  default     = "monitoring/docker-compose.monitoring.yml"
+}
+
 variable "web_port" {
   description = "Public web port"
   type        = number
   default     = 8000
+}
+
+variable "prometheus_port" {
+  description = "Public Prometheus port"
+  type        = number
+  default     = 9090
+}
+
+variable "grafana_port" {
+  description = "Public Grafana port"
+  type        = number
+  default     = 3000
 }

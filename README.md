@@ -55,3 +55,37 @@ docker compose down
 - `data_research` читає дані з БД і формує `research_report.json`
 - `visualization` читає дані з БД і формує PNG-графіки
 - `web` показує таблицю даних, звіти та графіки через браузер
+
+## Monitoring: Prometheus and Grafana
+
+The project includes a monitoring stack for the Docker-based application.
+
+Monitoring services:
+
+- Prometheus collects metrics from monitoring targets.
+- Grafana visualizes metrics on a dashboard.
+- Node Exporter provides Linux VM metrics.
+- cAdvisor provides Docker container metrics.
+- The Flask web service exposes application metrics at /metrics.
+
+Local run:
+
+docker compose -f compose.yaml -f monitoring/docker-compose.monitoring.yml up -d --build
+
+Available URLs:
+
+- Web application: http://localhost:8000
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000
+
+Grafana credentials:
+
+- login: admin
+- password: admin
+
+Prometheus jobs:
+
+- prometheus
+- node-exporter
+- cadvisor
+- web-app
