@@ -2,3 +2,5 @@ flask
 pandas
 sqlalchemy
 psycopg2-binary
+
+prometheus-client
