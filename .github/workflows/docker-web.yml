@@ -1,0 +1,39 @@
+name: Build and publish web image
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "web/**"
+      - "shared/**"
+      - ".github/workflows/docker-web.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build web image
+        run: |
+          docker build \
+            -f web/Dockerfile \
+            -t ghcr.io/viramykhalchuk/open-data-ai-analytics-web:latest \
+            -t ghcr.io/viramykhalchuk/open-data-ai-analytics-web:${{ github.sha }} \
+            .
+
+      - name: Push web image
+        run: |
+          docker push ghcr.io/viramykhalchuk/open-data-ai-analytics-web:latest
+          docker push ghcr.io/viramykhalchuk/open-data-ai-analytics-web:${{ github.sha }}
+

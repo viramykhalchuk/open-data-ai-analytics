@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open-data-web
+  namespace: open-data
+  labels:
+    app: open-data-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: open-data-web
+  template:
+    metadata:
+      labels:
+        app: open-data-web
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/viramykhalchuk/open-data-ai-analytics-web:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: SHARED_DIR
+              value: /app/shared
+            - name: TABLE_NAME
+              value: transport_data
+            - name: DB_URL
+              value: postgresql+psycopg2://open_data_user:open_data_password@db:5432/open_data_db
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 20
