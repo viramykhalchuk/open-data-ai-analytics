@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY web/app.py /app/app.py
 COPY web/templates /app/templates
-COPY shared /app/shared
+
+RUN mkdir -p /app/shared/quality /app/shared/research /app/shared/figures
 
 CMD ["python", "app.py"]
