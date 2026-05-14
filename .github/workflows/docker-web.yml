@@ -36,4 +36,3 @@ jobs:
         run: |
           docker push ghcr.io/viramykhalchuk/open-data-ai-analytics-web:latest
           docker push ghcr.io/viramykhalchuk/open-data-ai-analytics-web:${{ github.sha }}
-
